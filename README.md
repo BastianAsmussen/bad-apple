@@ -11,3 +11,14 @@ nix-shell
 
 python src/generate.py
 ```
+
+## Running
+
+### Nix
+
+```sh
+nix-shell
+
+python src/display.py
+```
+
