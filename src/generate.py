@@ -74,7 +74,7 @@ def process_frame(frame_idx, width, frame, total_frames):
         ascii_art_lines = [ascii_art[i:i + width] for i in range(0, len(ascii_art), width)]
         
         percentage_complete = (frame_idx + 1) / total_frames * 100
-        logging.info(f"Processed frame {frame_idx}. (Progress: {percentage_complete:.2f}%)")
+        logging.info(f"Processed frame {frame_idx}/{total_frames}. (Progress: {percentage_complete:.2f}%)")
 
         return frame_idx, "\n".join(ascii_art_lines) + "\n" + "=" * width + "\n"
     except Exception as e:
@@ -84,7 +84,7 @@ def process_frame(frame_idx, width, frame, total_frames):
 def write_ascii_to_file(file_path, queue, total_frames, video_metadata):
     """Write ASCII art frames to a text file, preserving order."""
     with open(file_path, 'w') as f:
-        # Write metadata at the beginning
+        # Write metadata at the beginning.
         f.write(f"Video Resolution: {video_metadata['resolution']}\n")
         f.write(f"Video FPS: {video_metadata['fps']}\n")
         f.write("\n" + "=" * 80 + "\n\n")
