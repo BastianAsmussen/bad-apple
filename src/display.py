@@ -49,40 +49,54 @@ def read_ascii_frames(file_path):
 
     return frames, metadata
 
-def display_ascii_animation(stdscr, frames, delay=0.1):
+def display_ascii_animation(stdscr, frames, fps=24):
     """Display ASCII art frames in the terminal using curses."""
     curses.curs_set(0)  # Hide cursor.
     stdscr.nodelay(1)   # Make getch() non-blocking.
     
     terminal_height, terminal_width = stdscr.getmaxyx()
+    frame_duration = 1 / fps
+    start_time = time.time()
 
-    while True:
-        for frame in frames:
-            # Clear the screen.
-            stdscr.clear()
-            
-            # Resize and display frame within the terminal size.
-            frame_lines = frame.split('\n')
-            for y, line in enumerate(frame_lines[:terminal_height]):
-                if y < terminal_height:
-                    stdscr.addstr(y, 0, line[:terminal_width])
-            
-            stdscr.refresh()
+    frame_index = 0
+    while frame_index < len(frames):
+        frame_start_time = time.time()
 
-            time.sleep(delay)
+        # Clear the screen.
+        stdscr.clear()
+        
+        # Resize and display frame within the terminal size.
+        frame_lines = frames[frame_index].split('\n')
+        for y, line in enumerate(frame_lines[:terminal_height]):
+            if y < terminal_height:
+                stdscr.addstr(y, 0, line[:terminal_width])
+        
+        stdscr.refresh()
 
-            # Check for user input to quit the animation.
-            if stdscr.getch() != -1:
-                return
+        render_time = time.time() - frame_start_time
+        elapsed_time = time.time() - start_time
+        expected_time = (frame_index + 1) * frame_duration
+        time_to_sleep = expected_time - elapsed_time - render_time
+
+        if time_to_sleep > 0:
+            time.sleep(time_to_sleep)
+            frame_index += 1
+        else:
+            # Calculate the next frame index based on the elapsed time
+            frame_index = int(elapsed_time // frame_duration)
+
+        # Check for user input to quit the animation.
+        if stdscr.getch() != -1:
+            return
 
 if __name__ == "__main__":
     ascii_file_path = 'video_ascii.txt'
 
     try:
         frames, metadata = read_ascii_frames(ascii_file_path)
-        delay = 1 / metadata.get('fps', 24)  # Default to 24 FPS if not found.
-
-        curses.wrapper(display_ascii_animation, frames, delay)
+        fps = metadata.get('fps', 24)  # Default to 24 FPS if not found.
+        
+        curses.wrapper(display_ascii_animation, frames, fps)
     
     except FileNotFoundError as fnf_error:
         print(fnf_error)
